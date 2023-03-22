@@ -1,0 +1,616 @@
+﻿﻿// requests.js
+
+    var xmlSlowRequest;// TODO consolidate maybe
+    var lwsHomeAjaxRequest;
+    
+    var _DeltaMilliseconds = 0; // difference between localtime and LWS time in milli. used as optimisation because the time polling is not as fast as we want to update the seconds.
+    var _GraphLevel = -1; // -1 initially force rendering
+	var _CurrentEvent = -1; // -1 initially force rendering
+	var _LanguageIndex = _NotInitialised;
+	var _RenderEvents = false;
+    var _LastIndication = "NONE"; // No display or sound.
+	
+function SelectSingleNodeText(xmlDoc, elementPath) // TODO move to utils file
+{   
+	var result;
+	try
+	{
+		if (document.implementation && document.implementation.createDocument)      
+		{      
+			/*alert(' elementPath=' + elementPath);*/
+			var nodes = xmlDoc.evaluate(elementPath, xmlDoc, null, XPathResult.ANY_TYPE, null);
+				var node = nodes.iterateNext();
+				result = node.textContent;
+		}   
+		else
+		{
+			var node = xmlDoc.selectSingleNode(elementPath);
+			result = node.text;
+		}
+	}
+	catch(err)
+	{
+		result="Error";
+	}
+	return result;
+}  
+
+function GetXmlDoc(xmlText)
+{
+	var xmlDoc;
+	if (window.DOMParser)
+	{
+		parser=new DOMParser();
+		xmlDoc=parser.parseFromString(xmlText,"text/xml");
+	}
+	else // Internet Explorer
+	{
+		xmlDoc=new ActiveXObject("Microsoft.XMLDOM");
+		xmlDoc.loadXML(xmlText);
+	}
+		xmlDoc.async = false;
+		xmlDoc.preserveWhiteSpace=true;
+	return xmlDoc;
+ }
+ 
+ function GetHttpRequest()
+ {
+	var httpRequest; 
+	if (window.XMLHttpRequest)
+		httpRequest = new XMLHttpRequest(); // W3C?
+	else if (window.ActiveXObject)
+		httpRequest = new ActiveXObject("Microsoft.XMLHTTP");// ie
+	return httpRequest;
+ }
+    
+  function StartRequestTimers(useHomeAjax, useClock, useXmlSlow)// if use clock then must also useHomeAjax
+  {
+  	if(useHomeAjax == true)
+  	{
+	  	setInterval("SendLWSHomeAjaxRequest()", 1100);
+  	}
+  	if(useClock == true)// this is not actually a request timer, just an update screen timer.
+  	{
+	  	setInterval("UpdateClock()", 1000);// should be smoother if multiple of 1 second
+  	}
+  	if(useXmlSlow == true)
+  	{
+	  	setInterval("SendXmlSlowRequest()", 4000);
+  	}
+	
+  }
+  
+  function UpdateClock()// TODO possibly display use manually set locale
+  {// doesnt do any requests but uses clock set by xmllwshomeajax. 
+	var today = new Date();
+	var shiftedMilliseconds = today.getTime() + _DeltaMilliseconds;
+	var shiftedDate = new Date(shiftedMilliseconds);
+	var lwsTimeID = document.getElementById("lwsTime");
+	var lwsDateID = document.getElementById("lwsDate");
+	if(lwsTimeID != null)
+	{
+		if(_DeltaMilliseconds > 60000 || _DeltaMilliseconds < -60000)// 60 seconds out either way and we will show red.
+		{
+			lwsTimeID.innerHTML = shiftedDate.toLocaleTimeString();
+			lwsTimeID.style.color = 'red';
+		}
+		else
+		{
+			lwsTimeID.innerHTML = shiftedDate.toLocaleTimeString();
+			lwsTimeID.style.color = 'black';
+		}
+	}
+	if(lwsDateID != null)
+	{
+		if(_DeltaMilliseconds > 60000 || _DeltaMilliseconds < -60000)// 60 seconds out either way and we will show red.
+		{
+			lwsDateID.innerHTML = shiftedDate.toLocaleDateString();
+			lwsDateID.style.color = 'red';
+		}
+		else
+		{
+			lwsDateID.innerHTML = shiftedDate.toLocaleDateString();
+			lwsDateID.style.color = 'black';
+		}
+	}
+	var pcTimeID = document.getElementById("pcTime");
+	if(pcTimeID != null)
+	{
+		pcTimeID.innerHTML = today.toLocaleTimeString();
+	}
+	var pcDateID = document.getElementById("pcDate");
+	if(pcDateID != null)
+	{
+		pcDateID.innerHTML = today.toLocaleDateString();
+	}
+  }
+
+  function SendLWSHomeAjaxRequest() 
+  {
+ 	var currentDate = new Date();
+	url = _BaseDataUrl + 'ajax/xmllwshomeajax.xml?x='+ currentDate.getTime();
+	lwsHomeAjaxRequest = GetHttpRequest();
+    if (lwsHomeAjaxRequest != null) {
+      lwsHomeAjaxRequest.onreadystatechange = ProcessLWSHomeAjaxResponse;      
+      lwsHomeAjaxRequest.open("GET", url, true);
+      lwsHomeAjaxRequest.send(null);
+    }
+    else 
+    {
+      alert("Browser not supported");
+    }
+  }   
+  
+  function RenderLanguageSpecificHtml(language)
+  {
+	var tempTag = document.getElementById("homeLink")
+	if(tempTag != null)
+		tempTag.innerHTML = _Texts[_LanguageIndex][_Home];
+
+	tempTag = document.getElementById("eventLogLink")
+	if(tempTag != null)
+		tempTag.innerHTML = _Texts[_LanguageIndex][_EventLog];
+
+	tempTag = document.getElementById("settingsLink")
+	if(tempTag != null)
+		tempTag.innerHTML = _Texts[_LanguageIndex][_Settings];
+
+	tempTag = document.getElementById("supportingDocumentsLink")
+	if(tempTag != null)
+		tempTag.innerHTML = _Texts[_LanguageIndex][_SupportingDocuments];
+
+	tempTag = document.getElementById("eventIndicationLabel")
+	if(tempTag != null)
+		tempTag.innerHTML = _Texts[_LanguageIndex][_EventIndication];
+
+	tempTag = document.getElementById("eFieldLevelLabel")
+	if(tempTag != null)
+		tempTag.innerHTML = _Texts[_LanguageIndex][_ElectricFieldLevel];
+		
+	tempTag = document.getElementById("dateLabel")
+	if(tempTag != null)
+		tempTag.innerHTML = _Texts[_LanguageIndex][_LWSTimeAndDate];
+
+	tempTag = document.getElementById("entityHeading")
+	if(tempTag != null)
+		tempTag.innerHTML = _Texts[_LanguageIndex][_Entity];
+
+	tempTag = document.getElementById("voltageHeading")
+	if(tempTag != null)
+		tempTag.innerHTML = _Texts[_LanguageIndex][_VoltageVolts];
+
+	tempTag = document.getElementById("signalHeading")
+	if(tempTag != null)
+		tempTag.innerHTML = _Texts[_LanguageIndex][_SignalDbm];
+
+	tempTag = document.getElementById("commsHeading")
+	if(tempTag != null)
+		tempTag.innerHTML = _Texts[_LanguageIndex][_Comms];
+  }
+
+  function ProcessLWSHomeAjaxResponse() 
+  {
+	  if (lwsHomeAjaxRequest != null)
+	  {
+	    if (lwsHomeAjaxRequest.readyState == 4) 
+	    { 
+	      if (lwsHomeAjaxRequest.status == 200) 
+	      { 
+			var xmlDoc = GetXmlDoc(lwsHomeAjaxRequest.responseText);
+			var lwsTimeString = xmlDoc.getElementsByTagName("time")[0].childNodes[0].nodeValue;
+			var lwsMilliseconds = Date.parse(lwsTimeString);
+			var pcDate = new Date();
+			_DeltaMilliseconds = lwsMilliseconds - pcDate.getTime();
+			if(_RenderEvents)
+			{
+				RenderLWSHomeAjaxResponse(xmlDoc);
+			}
+	      }
+	    }
+	 }
+  }
+//<lws_home_ajax version="1.0">
+//	<time>Jan 23 13:53:56 2012</time>
+//	<SensorState>ALL CLEAR</SensorState>
+//	<Indication>ALL_CLEAR</Indication>
+//	<IndicationDuration>10</IndicationDuration>
+//	<language>English</language>
+//	<current_event>None</current_event>
+//	<graph_level>0</graph_level>
+//  <other_warnings>COMMS_LOST</other_warnings> // tag only sent sometimes
+//  <other_warnings>SENSOR_BATTERY_FLAT</other_warnings>  // tag only sent sometimes
+//  <other_warnings>RE_BATTERY_FLAT</other_warnings>  // tag only sent sometimes
+//</lws_home_ajax>  
+  
+  function RenderLWSHomeAjaxResponse(xmlDoc)
+  {
+	var languageString = xmlDoc.getElementsByTagName("language")[0].childNodes[0].nodeValue;
+	var newLanguageIndex = _English;
+	if(languageString == "ChineseSimplified") 
+	{
+		newLanguageIndex = _ChineseSimplified;
+	}
+	else
+	{
+		if(languageString == "ChineseTraditional")
+		{
+			newLanguageIndex = _ChineseTraditional;
+		}
+	}
+	if(newLanguageIndex != _LanguageIndex)
+	{// only render if it has changed
+		_LanguageIndex = newLanguageIndex;
+		RenderLanguageSpecificHtml(_LanguageIndex);
+	}
+	//state
+	var sensorstate = xmlDoc.getElementsByTagName("SensorState")[0].childNodes[0].nodeValue;
+	var stateHtml = "";
+	if(sensorstate == "ALARM")
+	{
+		stateHtml = "<font size = \"5\" color = \"red\"><b>" + _Texts[_LanguageIndex][_ALARM] + "</b></font>";
+	}
+	else if(sensorstate == "WARNING")
+	{
+		stateHtml = "<font size = \"5\" color = \"orangered\"><b>" + _Texts[_LanguageIndex][_WARNING] + "</b></font>";
+	}
+	else
+	{
+		stateHtml = "<font size = \"5\" color = \"green\"><b>" + _Texts[_LanguageIndex][_ALL_CLEAR] + "</b></font>";
+	}
+	var stateID = document.getElementById("STATE")
+	if(stateID != null)
+		stateID.innerHTML = stateHtml;
+	
+	// events
+	var newEvent = xmlDoc.getElementsByTagName("current_event")[0].childNodes[0].nodeValue;
+	_CurrentEvent
+	if(_CurrentEvent != newEvent)
+	{
+		_CurrentEvent = newEvent;
+		var eventImageName = GetEventImageName(newEvent, languageString);
+		var currentEventHtml = "<p style = \"text-align: center;\"><img src = \"images/" + eventImageName + "\"></p>";
+		var eventID = document.getElementById("EVENT")
+		if(eventID != null)
+			eventID.innerHTML = currentEventHtml;
+	}
+
+	
+	// status changes, (sounds and banner)
+	var currentIndication = xmlDoc.getElementsByTagName("Indication")[0].childNodes[0].nodeValue;
+	var indicationDuration = xmlDoc.getElementsByTagName("IndicationDuration")[0].childNodes[0].nodeValue;
+
+	if(_LastIndication != currentIndication)
+	{ // change indication banner.
+		_LastIndication = currentIndication;
+		var statusChangeID = document.getElementById("STATUS_CHANGE")
+		if(statusChangeID != null)
+		{
+			statusChangeID.innerHTML = GetIndicationHtml(currentIndication, sensorstate);
+		}
+		
+		//start new sound
+		var soundID = document.getElementById("SOUND")
+		if(soundID != null)
+		{
+			soundID.innerHTML = GetSoundHtml(currentIndication, indicationDuration);
+		}
+	}
+	
+	
+	// graph
+	var newLevel = xmlDoc.getElementsByTagName("graph_level")[0].childNodes[0].nodeValue;
+	if(_GraphLevel != newLevel)
+	{
+		_GraphLevel = newLevel;
+		var graphHtml = "<p style = \"text-align: center;\"><img src = \"images/" + _GraphLevel + ".jpg\"></p>"
+		var graphID = document.getElementById("GRAPH");
+		if(graphID != null)
+			graphID.innerHTML = graphHtml;
+	}
+
+
+	var other_warnings = xmlDoc.getElementsByTagName("other_warnings");// from xml
+	if(other_warnings != null)
+	{
+		var otherWarningsID = document.getElementById("OTHER_WARNINGS")// 
+		otherWarningsID.innerHTML = "";
+		for (var i = 0; i < other_warnings.length; i++ )
+		{   
+			var otherWarningText = other_warnings[i].childNodes[0].nodeValue;
+			otherWarningsID.innerHTML = otherWarningsID.innerHTML + GetOtherWarningsHtml(otherWarningText);
+		} 
+	}
+
+  }
+  
+function GetEventImageName(eventName, language)
+{
+
+	var imageName = "";
+	switch(eventName)
+	{
+		case "None":imageName = "nostrike";break;
+		case "ACMA":imageName = "nostrike";break;
+		case "NRMA":imageName = "nearstrike";break;
+		case "EHMA":imageName = "highef";break;
+		case "FRMA":imageName = "farstrike";break;
+		case "ELMA":imageName = "lowef";break;
+	}
+	if(language == "ChineseSimplified")
+	{
+		imageName += "Chin";
+	}
+	else if(language == "ChineseTraditional")
+	{
+		imageName += "ChinT";
+	}
+
+
+	imageName += ".jpg";
+	return imageName;
+}
+
+
+
+  
+  
+ /*
+   <lws_slow_poll version="1.0">
+   <time>Thu Jun 23 15:26:08 2011
+</time>
+<console><battery_voltage>255</battery_voltage><rssi>-44</rssi><boot_time>2011-06-20 13:55:25</boot_time><free_memory>524288</free_memory></console>
+<sensor1><battery_voltage>13.77</battery_voltage><rssi>-255</rssi><boot_time>1900-01-00 00:00:00</boot_time><free_memory>688128</free_memory></sensor1>
+</lws_slow_poll>*/
+  
+ // Draw table from xDoc document tree data
+ 
+function DeleteRowsFromTable(tableName)
+{
+    var table = document.getElementById(tableName);
+	if(table != null)
+    {
+		var rows = table.rows;
+		while(rows.length > 0)
+			table.deleteRow(rows.length-1);
+	}
+}
+ 
+function drawTable(tbody, xDoc)
+{
+    var i;
+    var tbodyObject = document.getElementById(tbody);
+    // node tree
+    var baseElement = xDoc.getElementsByTagName("lws_slow_poll")[0];
+    // for td class attributes
+
+    for (i = 0; i < baseElement.childNodes.length; i++)
+	{
+		var entityNode = baseElement.childNodes[i];
+		if (entityNode.nodeType==1 && entityNode.nodeName != "time")// make sure it is an actual entity and not the "time" node
+		{
+			var tr = tbodyObject.insertRow(tbodyObject.rows.length);
+			var td = tr.insertCell(tr.cells.length);// cell for entity name
+			var entityNodeName = _Texts[_LanguageIndex][_Console];
+			if(entityNode.nodeName != "console")
+			{
+				if(entityNode.nodeName == "sensor1")
+				{
+					entityNodeName = _Texts[_LanguageIndex][_Sensor];
+				}
+				else
+				{
+					var rangeExtenderNumber = entityNode.nodeName.replace( /(re_)(\d+)/i,'$2');
+					entityNodeName = _Texts[_LanguageIndex][_RangeExtender] + " " + rangeExtenderNumber;
+				}
+			}
+			td.innerHTML = entityNodeName;
+
+			td = tr.insertCell(tr.cells.length);// cell for voltage
+			var voltage = SelectSingleNodeText(xDoc, "/lws_slow_poll/" + entityNode.nodeName + "/battery_voltage");
+			var rssi = SelectSingleNodeText(xDoc, "/lws_slow_poll/" + entityNode.nodeName + "/rssi");
+			if(entityNode.nodeName != "console")// console doesn't measure voltage.
+			{
+				var color = "green";
+				if(voltage != "Error" && voltage != "")
+				{
+					if(voltage < 7 || voltage > 15)
+					{
+						voltage = _Texts[_LanguageIndex][_Error];
+						color = "red";
+					}
+					if(voltage < 11.5)
+					{
+						color = "orange";
+					}
+					if(voltage < 11)
+					{
+						color = "red";
+					}
+				}
+				else
+				{
+					voltage = _Texts[_LanguageIndex][_Error];
+					color = "red";
+				}
+				td.innerHTML = voltage;
+				td.style.color = color;
+			}
+			else
+			{
+				td.innerHTML = "6.0";
+				td.style.color = 'green';
+			}
+			
+			td = tr.insertCell(tr.cells.length);// cell for rssi
+			var color = "green";
+			if(rssi != "Error" && rssi != "")
+			{
+				if(rssi < -130 || rssi > -24)// sanity check, outside these is rubbish
+				{
+					rssi = _Texts[_LanguageIndex][_Error];
+					color = "red";
+				}
+				if(rssi < -88)
+				{
+					color = "orange";
+				}
+				if(rssi < -96)
+				{
+					color = "red";
+				}
+			}
+			else
+			{
+				rssi = _Texts[_LanguageIndex][_Error];
+				color = "red";
+			}
+			td.innerHTML = rssi;
+			td.style.color = color;
+
+			td = tr.insertCell(tr.cells.length);// cell for overall status
+			if(entityNode.childNodes.length > 1)// 4 nodes if all good and a single text node if bad.
+			{
+				td.innerHTML = _Texts[_LanguageIndex][_OK];
+				color = "green";
+			}
+			else
+			{// if entity is not present there are no child nodes
+				td.innerHTML = "Fail";
+				color = "red";
+			}
+			td.style.color = color;
+		}
+	}
+}
+  
+  function SendXmlSlowRequest() 
+  {
+    url = _BaseDataUrl + 'ajax/xmlslow.xml?x='+  + new Date().getTime();
+	xmlSlowRequest = GetHttpRequest();
+    if (xmlSlowRequest != null) {
+      xmlSlowRequest.onreadystatechange = RenderXmlSlowResponse;      
+      xmlSlowRequest.open("GET", url, true);
+      xmlSlowRequest.send(null);
+    }
+    else 
+    {
+      alert("Browser not supported");
+    }
+  }
+  
+  function RenderXmlSlowResponse() 
+  {
+	if (xmlSlowRequest != null) 
+	{
+	    if (xmlSlowRequest.readyState == 4) 
+	    { 
+	      if (xmlSlowRequest.status == 200) 
+	      { 
+			var xmlDoc = GetXmlDoc(xmlSlowRequest.responseText);
+			DeleteRowsFromTable('statusTableData');
+			drawTable('statusTableData', xmlDoc);
+	      }
+	    }
+	}
+  }
+  
+  function GetIndicationHtml(indicationString, sensorstate)
+  {
+      var assertString = "";
+      var textString = "";
+      var colorString = "";
+  
+	  switch (indicationString)
+	  {
+		case "ALARM":
+			textString =  _Texts[_LanguageIndex][_AlarmEventMessage];
+			if(sensorstate != "ALARM")
+				assertString = _Texts[_LanguageIndex][_ASSERT_ALARM_STATE];
+			colorString = "red";
+			break;
+		case "WARNING":
+			textString =  _Texts[_LanguageIndex][_WarningEventMessage];
+			if(sensorstate != "WARNING")
+				assertString = _Texts[_LanguageIndex][_ASSERT_ALARM_STATE];
+			colorString = "orangered";
+			break;
+		case "ALL_CLEAR":
+			textString =  _Texts[_LanguageIndex][_AllClearEventMessage];
+			if(sensorstate != "ALL_CLEAR")
+				assertString = _Texts[_LanguageIndex][_ASSERT_ALARM_STATE];
+			colorString = "green";
+			break;
+		default : // "NONE"
+	  }
+	  var result = "";
+	  if(assertString != "")
+	  {
+		  assertString = "<span style=\"font-size: larger; color: green;\">" + assertString + ":</span><br>";
+	  }
+	  if(textString != "")
+	  {
+		  textString = "<span style=\"font-size: larger; font-weight: bold; color: " + colorString + ";\">" + textString + "</span>";
+	  }
+	  result = assertString + textString;
+	  if(result != "")
+	  {
+		result = "<p>" + result + "</p>";
+	  }
+	  return result;
+  }
+  
+  function GetOtherWarningsHtml(warningString)
+  {
+	var textString = "";
+	var result = "";
+	  switch (warningString)
+	  {
+		case "COMMS_LOST":
+			textString =  _Texts[_LanguageIndex][_COMMS_LOST];
+			break;
+		case "SENSOR_BATTERY_FLAT":
+			textString =  _Texts[_LanguageIndex][_SENSOR_BATTERY_FLAT];
+			break;
+		case "RE_BATTERY_FLAT":
+			textString =  _Texts[_LanguageIndex][_RE_BATTERY_FLAT];
+			break;
+		default : // "NONE"
+	  }
+	  if(textString != "")
+	  {
+		  result = "<p><span style=\"font-size: larger; color: red;\">" + textString + ":</span></p>";
+	  }
+	  return result;
+  }
+  
+  function GetSoundHtml(indicationString, duration)// duration not used yet
+  {
+      var soundString = '<object type="audio/x-wav" data="/sounds/xxxFileName"  width="200" height="20"><param name="src" value="/sounds/xxxFileName">';
+  	  soundString += '<param name="autoplay" value="true"><param name="autoStart" value="1">alt : <a href="/sounds/xxxFileName">xxxFileName</a></object>';
+  	  var soundFileName = "";
+	  switch (indicationString)
+	  {
+		case "ALARM":
+			soundFileName = "ALARM.wav";
+			break;
+		case "WARNING":
+			soundFileName = "WARNING.wav";
+			break;
+		case "ALL_CLEAR":
+			soundFileName = "ALL_CLEAR.wav";
+			break;
+		default : // "NONE"
+		 soundString = "";
+	  }
+		if(soundString != "")
+			return soundString.replace(/xxxFileName/g, soundFileName);
+		else
+			return "";
+  }
+  
+ //<param name="autostart" value="true"> 
+
+
+
+   
+

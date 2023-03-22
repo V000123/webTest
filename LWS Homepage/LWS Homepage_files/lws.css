@@ -1,0 +1,228 @@
+  
+/* Tell the browser to render HTML 5 elements as block */  
+header, footer, aside, nav, article {  
+    display: block;  
+}  
+
+body
+{
+	color:#000000;
+	background-color:#ffffff;
+	margin:0px;
+	overflow:auto;
+	background-image:url('/images/gradientfromtop.gif');
+	background-repeat:repeat-x;
+	padding: 2px 0 0 0;
+}
+
+body,p,h1,h2,h3,h4,h5, h6, table,td,th,ul,ol,textarea,input
+{
+	font-family:Georgia,"Times New Roman",serif;
+}
+
+body,p,table,td,th,ul,ol,textarea,input,a
+{
+	font-size: small;
+}
+
+p
+{  
+    padding: 8px;  
+}  
+
+h1 {font-size:200%;margin-top:0px;font-weight:normal;}
+h2 {font-size:160%;margin-top:10px;margin-bottom:10px;font-weight:normal;}
+h3 {font-size:120%;font-weight:normal;}
+h4 {font-size:100%;}
+h5 {font-size:90%;}
+h6 {font-size:110%; padding: 3px; margin: 2px;}
+
+h1,h2,h3,h4,h5,h6
+{
+	background-color:transparent;
+	color:#000000;
+}
+
+table,th,td,input,textarea
+{
+}
+ 
+
+table
+{
+	border:1px solid gray;
+	border-collapse:collapse;
+}
+  
+div.fullWidth
+{
+	background-color:White;
+}
+  
+table.mainContentHolder
+{
+	padding: 1px;
+	border:1px solid gray;
+	background-color:White;
+}
+  
+table.mainContent 
+{  
+	background-color:White;
+	border:1px solid gray;
+	border-collapse: collapse;
+	width: 55em;
+}  
+
+table.mainContent td.leftPane
+{  
+	padding: 20px 8px 20px 8px;
+	background-color:LightGray;
+	border-top:0;
+	border-right:1px solid gray;
+	border-bottom:0;
+	border-left:0;
+	width: 24em;
+} 
+table.mainContent td.rightPane
+{  
+	padding: 20px 8px 20px 8px;
+	background-color:LightSteelBlue;
+	border:0;
+}  
+ 
+table.mainContent td.leftPaneBottom
+{  
+	padding: 8px;
+	background-color:LightGray;
+	border-top:0;
+	border-right:1px solid gray;
+	border-bottom:0;
+	border-left:0;
+} 
+table.mainContent td.rightPaneBottom
+{  
+	padding: 8px;
+	background-color:LightSteelBlue;
+	border:0;
+}  
+ 
+
+
+
+table.graph td
+{
+	border: 1px solid gray;
+}
+
+table#statusTable
+{
+	border:1px solid #c3c3c3;
+	border-collapse:collapse;
+}
+
+table#statusTable th
+{
+	background-color:#e5eecc;
+	border:1px solid #c3c3c3;
+	padding:3px;
+	vertical-align:middle;
+	font-size:120%;
+	font-weight:normal;
+	vertical-align:top;
+}
+
+table#statusTable td 
+{
+	background-position:center;
+	border:1px solid #c3c3c3;
+	padding:3px;
+	vertical-align:middle;
+	background-position:center;
+	background-repeat:no-repeat;
+	border:1px solid #dadada;
+	text-align:center;
+}
+
+input.lwsButtonWide
+{
+   width:16em;
+}
+
+input.lwsButton, input.lwsButtonWide
+{
+	font-size:14px;
+    background-color:#779999;
+    background-image:url(/images/lwsButton.gif);
+    border-style:solid;
+    border-color:#DDDDDD;
+    border-width:1px;
+    padding: 3px;
+	background-position: center;
+}
+
+  #header {  }
+  #header-content {  }
+
+div.languageLinksHolder
+{
+	height:7em;
+}
+
+ul.languageLinks
+{
+	list-style-type: none;
+	padding: 2px;
+	margin: 0;
+}
+
+div.smallPadding
+{
+	padding: 2px;
+}
+
+ul.navlinks
+{
+	list-style-type: none;
+	padding: 2px;
+	margin: 0;
+}
+
+ul.navlinks li.linkHeading
+{
+	font-weight: bold;
+}
+
+ul.navlinks li, ul.languageLinks li
+{
+	padding: 2px;
+}
+
+span.dateTime
+{
+	font-weight:normal;
+	padding: 2px;
+}
+
+span.dateLabel
+{
+	font-weight:bold;
+}
+
+span.labelRight, td.labelRight
+{
+	text-align: right;
+}
+
+textarea#datalog
+{
+	font-family: courier, verdana, arial;
+}
+
+select.dropDown
+{
+    border: 1px solid gray;
+    font-size: medium;
+    font-weight: bold;
+    padding: 2px 2px 2px 10px;
+}

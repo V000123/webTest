@@ -1,0 +1,140 @@
+﻿//LanguageText.js
+var _NotInitialised = -1;
+var _English = 0;
+var _ChineseSimplified = 1;
+var _ChineseTraditional = 2;
+var _LanguageCount = 3;// used to set the size of array
+
+var _ALARM = 0;
+var _WARNING = 1;
+var _ALL_CLEAR = 2;
+var _Error = 3;
+var _Console = 4;
+var _Sensor = 5;
+var _RangeExtender = 6;
+var _EventIndication = 7;
+var _ElectricFieldLevel = 8;
+var _Entity = "9";
+var _VoltageVolts= 10;
+var _SignalDbm = 11;
+var _Comms = 12;
+var _LWSTimeAndDate = 13;
+var _Home = 14;
+var _EventLog = 15;
+var _Settings = 16;
+var _SupportingDocuments = 17;
+var _OK = 18;
+var _Fail = 19;
+var _WarningEventMessage = 20;
+var _AlarmEventMessage = 21;
+var _AllClearEventMessage = 22;
+var _COMMS_LOST = 23;
+var _SENSOR_BATTERY_FLAT = 24;
+var _RE_BATTERY_FLAT = 25;
+var _ASSERT_ALARM_STATE = 26;
+
+// insert new entries here.
+var _MessageCount = 27;// used to set the size of array
+
+var _Texts = new Array(_LanguageCount);
+for (i=0; i <_LanguageCount; i++)
+{
+	_Texts[i]=new Array(_MessageCount);
+}
+
+_Texts[_English][_ALARM] = "ALARM";
+_Texts[_English][_WARNING] = "WARNING";
+_Texts[_English][_ALL_CLEAR] = "ALL CLEAR";
+_Texts[_English][_Error] = "Error";
+_Texts[_English][_Console] = "Console";
+_Texts[_English][_Sensor] = "Sensor";
+_Texts[_English][_RangeExtender] = "Range Extender";
+_Texts[_English][_EventIndication] = "Event Indication";
+_Texts[_English][_ElectricFieldLevel] = "Electric Field Level";
+_Texts[_English][_Entity] = "Entity";
+_Texts[_English][_VoltageVolts] = "Voltage (volts)";
+_Texts[_English][_SignalDbm] = "Signal (dbm)";
+_Texts[_English][_Comms] = "Comms";
+_Texts[_English][_LWSTimeAndDate] = "Lightning Warning System Time ";
+_Texts[_English][_Home] = "Home";
+_Texts[_English][_EventLog] = "Event Log";
+_Texts[_English][_Settings] = "Settings";
+_Texts[_English][_SupportingDocuments] = "Supporting Documents";
+_Texts[_English][_OK] = "OK";
+_Texts[_English][_Fail] = "Fail";
+_Texts[_English][_WarningEventMessage] = "WARNING: Lightning detected within 25km or Low Electric Field";
+_Texts[_English][_AlarmEventMessage] = "ALARM: Lightning detected within 10km or High Electric Field";
+_Texts[_English][_AllClearEventMessage] = "ALL CLEAR: Lightning activity has cleared";
+_Texts[_English][_COMMS_LOST] = "Communications with the Master Sensor has been lost. Ensure that Master Sensor is Installed and has Power";
+_Texts[_English][_SENSOR_BATTERY_FLAT] = "Sensor Battery is flat! Please check battery status page for details, and replace battery.";
+_Texts[_English][_RE_BATTERY_FLAT] = "A Range Extender Battery is flat! Please check battery status page for details, and replace battery.";
+_Texts[_English][_ASSERT_ALARM_STATE] = "Assert Alarm State";
+
+
+// if more messages used then reset  _MessageCount
+
+
+_Texts[_ChineseSimplified][_ALARM] = "警戒";
+_Texts[_ChineseSimplified][_WARNING] = "预警";
+_Texts[_ChineseSimplified][_ALL_CLEAR] = "所有警报已解除";
+_Texts[_ChineseSimplified][_Error] = "错误";
+_Texts[_ChineseSimplified][_Console] = "控制台";
+_Texts[_ChineseSimplified][_Sensor] = "传感器";
+_Texts[_ChineseSimplified][_RangeExtender] = "范围扩展";
+_Texts[_ChineseSimplified][_EventIndication] = "状态显示";
+_Texts[_ChineseSimplified][_ElectricFieldLevel] = "雷电等级";
+_Texts[_ChineseSimplified][_Entity] = "仪器"; 
+_Texts[_ChineseSimplified][_VoltageVolts] = "电压（伏）";
+_Texts[_ChineseSimplified][_SignalDbm] = "信号 (dbm)";
+_Texts[_ChineseSimplified][_Comms] = "通讯科";
+_Texts[_ChineseSimplified][_LWSTimeAndDate] = "雷电预警系统时间和日期: ";
+_Texts[_ChineseSimplified][_Home] = "链接";
+_Texts[_ChineseSimplified][_EventLog] = "日志事件";
+_Texts[_ChineseSimplified][_Settings] = "设置";
+_Texts[_ChineseSimplified][_SupportingDocuments] = "技术文件";
+_Texts[_ChineseSimplified][_OK] = "OK";
+_Texts[_ChineseSimplified][_Fail] = "失败";
+_Texts[_ChineseSimplified][_WarningEventMessage] = "预警:雷电将会生成并已进入25公里范围内";
+_Texts[_ChineseSimplified][_AlarmEventMessage] = "警戒:雷电将会生成并已进入10公里范围内";
+_Texts[_ChineseSimplified][_AllClearEventMessage] = "警报解除信号:雷电活动消失";
+_Texts[_ChineseSimplified][_COMMS_LOST] = "感应器讯号已终止。请确认感应器已安装妥当及电池正常";
+_Texts[_ChineseSimplified][_SENSOR_BATTERY_FLAT] = "感应器电池电量不足!请检查电池是否处于正常工作状态或尽快更换电池";
+_Texts[_ChineseSimplified][_RE_BATTERY_FLAT] = "转发器电池已耗尽! 请检查电池是否处于正常工作状态或尽快更换电池";
+_Texts[_ChineseSimplified][_ASSERT_ALARM_STATE] = "警报器控制";
+
+_Texts[_ChineseTraditional][_ALARM] = "警戒";
+_Texts[_ChineseTraditional][_WARNING] = "預警";
+_Texts[_ChineseTraditional][_ALL_CLEAR] = "所有警報已解除";
+_Texts[_ChineseTraditional][_Error] = "錯誤";
+_Texts[_ChineseTraditional][_Console] = "控制台";
+_Texts[_ChineseTraditional][_Sensor] = "傳感器";
+_Texts[_ChineseTraditional][_RangeExtender] = "範圍擴展";
+_Texts[_ChineseTraditional][_EventIndication] = "狀態顯示";
+_Texts[_ChineseTraditional][_ElectricFieldLevel] = "雷電等級";
+_Texts[_ChineseTraditional][_Entity] = "儀器";
+_Texts[_ChineseTraditional][_VoltageVolts] = "電壓（伏）";
+_Texts[_ChineseTraditional][_SignalDbm] = "信號 (dbm)";
+_Texts[_ChineseTraditional][_Comms] = "通訊科";
+_Texts[_ChineseTraditional][_LWSTimeAndDate] = "雷電預警系統時間和日期: ";
+_Texts[_ChineseTraditional][_Home] = "鏈接";
+_Texts[_ChineseTraditional][_EventLog] = "日誌事件";
+_Texts[_ChineseTraditional][_Settings] = "設置";
+_Texts[_ChineseTraditional][_SupportingDocuments] = "技術文件";
+_Texts[_ChineseTraditional][_OK] = "OK";
+_Texts[_ChineseTraditional][_Fail] = "失敗";
+_Texts[_ChineseTraditional][_WarningEventMessage] = "預警:雷電將會生成並已進入25公里範圍內";
+_Texts[_ChineseTraditional][_AlarmEventMessage] = "警戒:雷電將會生成並已進入10公里範圍內";
+_Texts[_ChineseTraditional][_AllClearEventMessage] = "警報解除信號:雷電活動消失";
+_Texts[_ChineseTraditional][_COMMS_LOST] = "感應器訊號已終止.請確認感應器已安裝妥當及電池正常";
+_Texts[_ChineseTraditional][_SENSOR_BATTERY_FLAT] = "感應器電池電量不足! 請檢查電池是否處於正常工作狀態或儘快更換電池";
+_Texts[_ChineseTraditional][_RE_BATTERY_FLAT] = "轉發器電池已耗盡! 請檢查電池是否處於正常工作狀態或儘快更換電池";
+_Texts[_ChineseTraditional][_ASSERT_ALARM_STATE] = "警報器控制";
+
+// if more languages used then reset  _LanguageCount
+
+
+    
+    
+    
+
+    

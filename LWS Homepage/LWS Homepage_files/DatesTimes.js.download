@@ -1,0 +1,22 @@
+var _Weekday = new Array(7);
+_Weekday[0]="Sun";
+_Weekday[1]="Mon";
+_Weekday[2]="Tue";
+_Weekday[3]="Wed";
+_Weekday[4]="Thu";
+_Weekday[5]="Fri";
+_Weekday[6]="Sat";
+
+var _Months = new Array(12);
+_Months[0]="Jan";
+_Months[1]="Feb";
+_Months[2]="Mar";
+_Months[3]="Apr";
+_Months[4]="May";
+_Months[5]="Jun";
+_Months[6]="Jul";
+_Months[7]="Aug";
+_Months[8]="Sep";
+_Months[9]="Oct";
+_Months[10]="Nove";
+_Months[11]="Dec";
